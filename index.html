@@ -58,3 +58,32 @@
     .sub { margin-top: 0.5rem; color: var(--muted); font-size: 0.9rem; }
 
     
+     main {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      padding: 0 1.25rem 3rem;
+      width: 100%;
+      max-width: 1200px;
+      align-items: center;
+    }
+
+    .panel {
+      background: var(--surface);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem;
+    }
+    .panel-title {
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    
+    .draw-panel { flex: 0 0 auto; width: 100%; max-width: 1020px; display: flex; flex-direction: column; align-items: center; }
