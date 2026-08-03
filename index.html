@@ -298,3 +298,32 @@
       <button class="btn-clear" onclick="clearAll()">✕ Clear</button>
       <button class="btn-predict" id="predictBtn" onclick="predict()">Predict →</button>
     </div>
+
+    <div class="hint-row">
+      <span class="acc-dot"></span>
+      <span class="hint">MLP · 99.24% accuracy · Enter to predict</span>
+    </div>
+  </div>
+
+  
+  <div class="result-panel">
+
+    
+    <div class="panel number-card">
+      <p class="panel-title">Predicted number</p>
+      <div class="number-display empty" id="numberDisplay">
+        <span class="num-char">?</span>
+      </div>
+      <p class="conf-line" id="confLine">Draw a number above, then click Predict</p>
+    </div>
+
+    
+    <div class="panel cards-section">
+      <div class="bars-header">
+        <p class="panel-title" style="margin:0">Detected digits</p>
+        <span class="bars-subtitle" id="digitCountLabel">—</span>
+      </div>
+      <div class="digit-cards" id="digitCards">
+        <p class="no-digits">No digits detected yet</p>
+      </div>
+    </div>
