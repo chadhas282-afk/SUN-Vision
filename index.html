@@ -28,3 +28,33 @@
       color: var(--text);
       display: flex;
       flex-direction: column;
+      align-items: center;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(255,107,0,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255,204,0,0.1) 0%, transparent 60%);
+    }
+
+    
+    header { text-align: center; padding: 2.5rem 1rem 1.5rem; }
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 0.9rem;
+      border-radius: 100px;
+      background: rgba(255,107,0,0.15);
+      border: 1px solid rgba(255,107,0,0.35);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #ffaa00;
+      margin-bottom: 0.9rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    h1 {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff 10%, #ffcc00 60%, #ff4500 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .sub { margin-top: 0.5rem; color: var(--muted); font-size: 0.9rem; }
+
+    
