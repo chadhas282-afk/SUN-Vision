@@ -87,3 +87,33 @@
 
     
     .draw-panel { flex: 0 0 auto; width: 100%; max-width: 1020px; display: flex; flex-direction: column; align-items: center; }
+
+    #drawCanvas {
+      display: block;
+      width: 100%; max-width: 960px; height: auto;
+      aspect-ratio: 960 / 280;
+      background: #080808;
+      border-radius: 14px;
+      border: 1.5px solid rgba(124,58,237,0.25);
+      cursor: crosshair;
+      touch-action: none;
+      box-shadow: 0 0 40px rgba(124,58,237,0.08) inset;
+      transition: border-color 0.3s;
+    }
+    #drawCanvas.active { border-color: rgba(124,58,237,0.55); }
+
+    .brush-row {
+      display: flex; align-items: center; gap: 0.7rem;
+      margin-top: 0.9rem; color: var(--muted); font-size: 0.78rem;
+      width: 100%; max-width: 960px;
+    }
+    input[type=range] {
+      flex: 1; height: 4px; -webkit-appearance: none;
+      background: rgba(255,255,255,0.1); border-radius: 2px; outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 14px; height: 14px;
+      border-radius: 50%; background: var(--purple); cursor: pointer;
+      box-shadow: 0 0 8px rgba(124,58,237,0.7);
+    }
+    #brushVal { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; min-width: 2.5rem; text-align: right; }
