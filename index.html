@@ -388,3 +388,33 @@ const barsEl = document.getElementById('barsContainer');
 for (let i = 0; i < 10; i++) {
   barsEl.insertAdjacentHTML('beforeend', `
     <div class="bar-row" id="row-${i}">
+        <span class="bar-label">${i}</span>
+      <div class="bar-track"><div class="bar-fill" id="fill-${i}"></div></div>
+      <span class="bar-pct"  id="pct-${i}">—</span>
+    </div>`);
+}
+
+
+let lastData    = null;
+let selectedIdx = 0;
+
+
+function clearAll() {
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 960, 280);
+  lastData = null; selectedIdx = 0;
+
+  const nd = document.getElementById('numberDisplay');
+  nd.innerHTML = '<span class="num-char">?</span>'; nd.className = 'number-display empty';
+  document.getElementById('confLine').textContent = 'Draw a number above, then click Predict';
+  document.getElementById('digitCountLabel').textContent = '—';
+  document.getElementById('barsSubtitle').textContent = '—';
+  document.getElementById('digitCards').innerHTML = '<p class="no-digits">No digits detected yet</p>';
+  for (let i = 0; i < 10; i++) {
+    document.getElementById(`fill-${i}`).style.width = '0%';
+    document.getElementById(`pct-${i}`).textContent  = '—';
+    document.getElementById(`row-${i}`).classList.remove('winner');
+  }
+}
+
+
+function getFullPixels() {
