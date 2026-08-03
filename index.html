@@ -358,3 +358,33 @@ document.getElementById('brushSlider').addEventListener('input', function() {
 });
 
 function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+  const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+  const s  = e.touches ? e.touches[0] : e;
+  return { x: (s.clientX - rect.left) * sx, y: (s.clientY - rect.top) * sy };
+}
+
+function onStart(e) {
+  isDrawing = true;
+  const {x,y} = getPos(e); lastX = x; lastY = y;
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, brushSize/2, 0, Math.PI*2); ctx.fill();
+  canvas.classList.add('active'); e.preventDefault();
+}
+function onMove(e) {
+  if (!isDrawing) return;
+  const {x,y} = getPos(e);
+  ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+  lastX = x; lastY = y; e.preventDefault();
+}
+function onStop() { isDrawing = false; canvas.classList.remove('active'); }
+
+canvas.addEventListener('mousedown', onStart); canvas.addEventListener('mousemove', onMove);
+canvas.addEventListener('mouseup', onStop);    canvas.addEventListener('mouseleave', onStop);
+canvas.addEventListener('touchstart', onStart, {passive:false}); canvas.addEventListener('touchmove', onMove, {passive:false});
+canvas.addEventListener('touchend', onStop);
+
+
+const barsEl = document.getElementById('barsContainer');
+for (let i = 0; i < 10; i++) {
+  barsEl.insertAdjacentHTML('beforeend', `
+    <div class="bar-row" id="row-${i}">
