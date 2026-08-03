@@ -267,3 +267,34 @@
   </style>
 </head>
 <body>
+
+    <div id="loaderOverlay" class="loader-overlay" style="display:none;">
+  <img src="/logo.png" class="loader-logo" alt="SUN Vision">
+  <h2 class="loader-text">SUN is predicting...</h2>
+  <div class="loader-skeleton-bar"></div>
+</div>
+
+<header>
+  <img src="/logo.png" alt="SUN Vision Logo" style="width: 84px; height: 84px; border-radius: 22px; margin-bottom: 1.2rem; box-shadow: 0 10px 30px rgba(255,107,0,0.3);">
+  <br>
+  <p class="badge">numpy · neural network · 99.24% accuracy</p>
+  <h1>SUN Vision</h1>
+  <p class="sub">Draw a single digit or a multi-digit number (e.g. 42, 137…)</p>
+</header>
+
+<main>
+  
+  <div class="panel draw-panel">
+    <p class="panel-title">Draw here</p>
+    <canvas id="drawCanvas" width="960" height="280"></canvas>
+
+    <div class="brush-row">
+      <span>Brush</span>
+      <input type="range" id="brushSlider" min="8" max="36" value="22">
+      <span id="brushVal">22px</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-clear" onclick="clearAll()">✕ Clear</button>
+      <button class="btn-predict" id="predictBtn" onclick="predict()">Predict →</button>
+    </div>
