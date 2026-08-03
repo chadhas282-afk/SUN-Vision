@@ -327,3 +327,34 @@
         <p class="no-digits">No digits detected yet</p>
       </div>
     </div>
+
+        
+    <div class="panel bars-card">
+      <div class="bars-header">
+        <p class="panel-title" style="margin:0">Probabilities</p>
+        <span class="bars-subtitle" id="barsSubtitle">—</span>
+      </div>
+      <div id="barsContainer"></div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+
+const canvas  = document.getElementById('drawCanvas');
+const ctx     = canvas.getContext('2d');
+let brushSize = 22, isDrawing = false, lastX = 0, lastY = 0;
+
+ctx.fillStyle = '#000';
+ctx.fillRect(0, 0, 960, 280);
+ctx.strokeStyle = '#fff'; ctx.lineWidth = brushSize;
+ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+document.getElementById('brushSlider').addEventListener('input', function() {
+  brushSize = parseInt(this.value);
+  document.getElementById('brushVal').textContent = brushSize + 'px';
+  ctx.lineWidth = brushSize;
+});
+
+function getPos(e) {
