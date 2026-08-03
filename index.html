@@ -148,3 +148,33 @@
     }
     .number-card::before {
       content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 30%, rgba(255,107,0,0.1), transparent 70%);
+      pointer-events: none;
+    }
+    .number-display {
+      font-size: 5.5rem; font-weight: 900; line-height: 1;
+      min-height: 6.5rem;
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.1em;
+      letter-spacing: 0.05em;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .number-display.empty { opacity: 0.15; }
+    .num-char {
+      background: linear-gradient(135deg, #fff 10%, #ffcc00 80%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .conf-line { margin-top: 0.5rem; font-size: 0.82rem; color: var(--muted); min-height: 1.2em; }
+    .conf-line .val { color: #ffaa00; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+    
+    .cards-section { padding: 1.2rem 1.4rem; }
+    .digit-cards {
+      display: flex; gap: 0.7rem; flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+    .digit-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
