@@ -78,3 +78,23 @@ class NeuralNetwork:
             mw = self.m_w[i]/(1-self.beta1**self.t)
             mb = self.m_b[i]/(1-self.beta1**self.t)
             vw = self.v_w[i]/(1-self.beta2**self.t)
+            vb = self.v_b[i]/(1-self.beta2**self.t)
+            self.weights[i] -= self.lr * mw / (np.sqrt(vw)+self.eps)
+            self.biases[i]  -= self.lr * mb / (np.sqrt(vb)+self.eps)
+
+    def cosine_lr(self, epoch, total):
+        min_lr = self.initial_lr * 0.01
+        self.lr = min_lr + 0.5*(self.initial_lr-min_lr)*(1+np.cos(np.pi*epoch/total))
+
+    def predict(self, X):
+        return np.argmax(self.forward(X, training=False), axis=1)
+
+    def accuracy(self, X, y):
+        return float(np.mean(self.predict(X) == y))
+
+def download_mnist():
+    base = 'https://storage.googleapis.com/cvdf-datasets/mnist/'
+    files = ['train-images-idx3-ubyte.gz','train-labels-idx1-ubyte.gz',
+             't10k-images-idx3-ubyte.gz', 't10k-labels-idx1-ubyte.gz']
+    os.makedirs(DATA_DIR, exist_ok=True)
+    ctx = ssl._create_unverified_context()
