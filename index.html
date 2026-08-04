@@ -448,3 +448,33 @@ async function predict() {
     const data = await res.json();
     lastData = data;
     displayResults(data);
+    } catch (err) {
+    alert('Server error. Is app.py running?'); console.error(err);
+  }
+
+  loader.classList.remove('active');
+  setTimeout(() => loader.style.display = 'none', 400);
+
+  btn.disabled = false; btn.innerHTML = 'Predict →';
+}
+
+
+function displayResults(data) {
+  const {number, digits, previews} = data;
+
+  
+  const nd = document.getElementById('numberDisplay');
+  if (!number) {
+    nd.innerHTML = '<span class="num-char">?</span>';
+    nd.className = 'number-display empty';
+    document.getElementById('confLine').textContent = 'No digits detected — try drawing more clearly';
+    return;
+  }
+  nd.className = 'number-display pop';
+  nd.innerHTML = number.split('').map(c => `<span class="num-char">${c}</span>`).join('');
+
+  const avgConf = digits.reduce((s, d) => s + d.confidence, 0) / digits.length;
+  document.getElementById('confLine').innerHTML =
+    `${digits.length} digit${digits.length>1?'s':''} detected · avg confidence: <span class="val">${(avgConf*100).toFixed(1)}%</span>`;
+
+  
