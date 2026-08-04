@@ -418,3 +418,33 @@ function clearAll() {
 
 
 function getFullPixels() {
+  const raw = ctx.getImageData(0, 0, 960, 280).data;
+  const pix = [];
+  for (let i = 0; i < 960*280; i++) pix.push(raw[i*4]);  
+  return pix;
+}
+
+
+async function predict() {
+  const pixels = getFullPixels();
+  if (!pixels.some(p => p > 10)) { shake(canvas); return; }
+
+  const btn = document.getElementById('predictBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Predicting…';
+
+  const loader = document.getElementById('loaderOverlay');
+  loader.style.display = 'flex';
+  loader.offsetHeight; // force reflow
+  loader.classList.add('active');
+
+  // Artificial 2-second loading delay
+  await new Promise(r => setTimeout(r, 2000));
+
+  try {
+    const res  = await fetch('/predict_multi', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({pixels, width: 960, height: 280})
+    });
+    const data = await res.json();
+    lastData = data;
+    displayResults(data);
