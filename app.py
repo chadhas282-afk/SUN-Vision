@@ -98,3 +98,23 @@ def download_mnist():
              't10k-images-idx3-ubyte.gz', 't10k-labels-idx1-ubyte.gz']
     os.makedirs(DATA_DIR, exist_ok=True)
     ctx = ssl._create_unverified_context()
+    for f in files:
+        path = os.path.join(DATA_DIR, f)
+        if not os.path.exists(path):
+            print(f"  Downloading {f}...")
+            req = urllib.request.Request(base+f, headers={'User-Agent':'Mozilla/5.0'})
+            with urllib.request.urlopen(req, context=ctx) as r, open(path,'wb') as out:
+                out.write(r.read())
+
+def load_images(path):
+    with gzip.open(path, 'rb') as f:
+        data = np.frombuffer(f.read(), np.uint8, offset=16)
+    return data.reshape(-1, 784).astype(np.float32) / 255.0
+
+def load_labels(path):
+    with gzip.open(path, 'rb') as f:
+        return np.frombuffer(f.read(), np.uint8, offset=8)
+
+def one_hot(labels, n=10):
+    oh = np.zeros((len(labels), n), dtype=np.float32)
+    oh[np.arange(len(labels)), labels] = 1
