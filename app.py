@@ -238,3 +238,22 @@ def segment_digits(pixels_flat, W=280, H=280, threshold=0.15, gap_tol=8, min_w=8
             continue
         r0, r1  = int(rows[0]), int(rows[-1]) + 1
         crop    = arr[r0:r1, c0:c1].copy()
+         if crop.max() > 0:
+            crop /= crop.max()
+        crops.append(crop)
+    return crops
+
+def resize_to_28x28(crop):
+    H, W = crop.shape
+    if H == 0 or W == 0:
+        return np.zeros((28, 28), dtype=np.float32)
+    size   = max(H, W)
+    sq     = np.zeros((size, size), dtype=np.float32)
+    sq[(size-H)//2:(size-H)//2+H, (size-W)//2:(size-W)//2+W] = crop
+
+    ri   = np.clip(np.round(np.linspace(0, size-1, 20)).astype(int), 0, size-1)
+    ci   = np.clip(np.round(np.linspace(0, size-1, 20)).astype(int), 0, size-1)
+    small = sq[np.ix_(ri, ci)]
+    final = np.zeros((28, 28), dtype=np.float32)
+    final[4:24, 4:24] = small
+    return final
