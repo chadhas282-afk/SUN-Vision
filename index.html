@@ -508,3 +508,33 @@ function buildDigitCards(digits, previews) {
     const img  = pCtx.createImageData(28, 28);
     const flat = previews[i];
     for (let j = 0; j < 784; j++) {
+      const v = Math.round(flat[j] * 255);
+      img.data[j*4]=v; img.data[j*4+1]=v; img.data[j*4+2]=v; img.data[j*4+3]=255;
+    }
+    pCtx.putImageData(img, 0, 0);
+
+    card.appendChild(pc);
+    card.insertAdjacentHTML('beforeend',
+      `<span class="card-digit">${d.digit}</span>
+       <span class="card-conf">${(d.confidence*100).toFixed(1)}%</span>`);
+    container.appendChild(card);
+  });
+}
+
+function updateBars(digitResult, idx) {
+  document.getElementById('barsSubtitle').textContent = `Digit #${idx+1} → predicted "${digitResult.digit}"`;
+  for (let i = 0; i < 10; i++) {
+    const p   = digitResult.probabilities[i];
+    const pct = (p * 100).toFixed(1);
+    document.getElementById(`fill-${i}`).style.width = pct + '%';
+    document.getElementById(`pct-${i}`).textContent  = pct + '%';
+    document.getElementById(`row-${i}`).classList.toggle('winner', i === digitResult.digit);
+  }
+}
+
+
+function shake(el) {
+  el.style.transition = 'transform 0.08s ease';
+  [6,-6,4,-4,2,0].forEach((x,i) => setTimeout(() => { el.style.transform = `translateX(${x}px)`; }, i*80));
+  setTimeout(() => { el.style.transform = ''; el.style.transition = ''; }, 530);
+}
