@@ -38,3 +38,22 @@ class NeuralNetwork:
         return e / e.sum(axis=1, keepdims=True)
 
     def forward(self, X, training=True):
+        self.a     = [X]
+        self.z     = []
+        self.masks = []
+        act = X
+        for i in range(self.num_layers):
+            z = act @ self.weights[i] + self.biases[i]
+            self.z.append(z)
+            if i == self.num_layers - 1:
+                act = self.softmax(z)
+            else:
+                act = self.relu(z)
+                if training and self.dropout > 0:
+                    mask = (np.random.rand(*act.shape) > self.dropout) / (1 - self.dropout)
+                    act *= mask
+                    self.masks.append(mask)
+                else:
+                    self.masks.append(None)
+            self.a.append(act)
+        return self.a[-1]
