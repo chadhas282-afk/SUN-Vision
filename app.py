@@ -318,3 +318,8 @@ def predict_multi():
         'digits':   digits,
         'previews': previews,
     })
+
+if __name__ == '__main__':
+    NN, MU, SIGMA = load_model()
+    if NN is None:
+        NN, MU, SIGMA = train_and_save()
