@@ -478,3 +478,33 @@ function displayResults(data) {
     `${digits.length} digit${digits.length>1?'s':''} detected · avg confidence: <span class="val">${(avgConf*100).toFixed(1)}%</span>`;
 
   
+    document.getElementById('digitCountLabel').textContent = digits.length + ' digit' + (digits.length>1?'s':'');
+  buildDigitCards(digits, previews);
+
+  
+  selectedIdx = 0;
+  updateBars(digits[0], 0);
+}
+
+function buildDigitCards(digits, previews) {
+  const container = document.getElementById('digitCards');
+  container.innerHTML = '';
+
+  digits.forEach((d, i) => {
+    const card = document.createElement('div');
+    card.className = 'digit-card' + (i === 0 ? ' selected' : '');
+    card.onclick = () => {
+      document.querySelectorAll('.digit-card').forEach((c, j) => c.classList.toggle('selected', j === i));
+      selectedIdx = i;
+      updateBars(d, i);
+    };
+
+    
+    const pc = document.createElement('canvas');
+    pc.width = 28; pc.height = 28;
+    pc.className = 'card-canvas';
+    pc.style.cssText = 'width:52px;height:52px;image-rendering:pixelated;';
+    const pCtx = pc.getContext('2d');
+    const img  = pCtx.createImageData(28, 28);
+    const flat = previews[i];
+    for (let j = 0; j < 784; j++) {
