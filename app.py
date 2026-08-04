@@ -257,3 +257,23 @@ def resize_to_28x28(crop):
     final = np.zeros((28, 28), dtype=np.float32)
     final[4:24, 4:24] = small
     return final
+
+app = Flask(__name__)
+
+NN    = None
+MU    = None
+SIGMA = None
+
+@app.route('/')
+def index():
+    return send_file('index.html')
+
+@app.route('/logo.png')
+def logo():
+    return send_file('logo.png')
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    global NN, MU, SIGMA
+    data   = request.get_json()
+    pixels = np.array(data['pixels'], dtype=np.float32).reshape(1, 784)
