@@ -1,24 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SUN Vision · NumPy Neural Network</title>
   <meta name="description" content="Draw numbers and let SUN Vision's pure NumPy neural network predict them.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     :root {
-      --bg:      #080810;
-      --surface: rgba(255,255,255,0.04);
-      --border:  rgba(255,255,255,0.09);
-      --purple:  #ff6b00;
-      --cyan:    #ffcc00;
-      --text:    #f1f0ff;
-      --muted:   rgba(255,255,255,0.4);
-      --radius:  20px;
+      --bg: #080810;
+      --surface: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.09);
+      --purple: #ff6b00;
+      --cyan: #ffcc00;
+      --text: #f1f0ff;
+      --muted: rgba(255, 255, 255, 0.4);
+      --radius: 20px;
     }
 
     body {
@@ -30,18 +39,21 @@
       flex-direction: column;
       align-items: center;
       background-image:
-        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(255,107,0,0.15) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255,204,0,0.1) 0%, transparent 60%);
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(255, 107, 0, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255, 204, 0, 0.1) 0%, transparent 60%);
     }
 
-    
-    header { text-align: center; padding: 2.5rem 1rem 1.5rem; }
+    header {
+      text-align: center;
+      padding: 2.5rem 1rem 1.5rem;
+    }
+
     .badge {
       display: inline-block;
       padding: 0.3rem 0.9rem;
       border-radius: 100px;
-      background: rgba(255,107,0,0.15);
-      border: 1px solid rgba(255,107,0,0.35);
+      background: rgba(255, 107, 0, 0.15);
+      border: 1px solid rgba(255, 107, 0, 0.35);
       font-size: 0.72rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -49,15 +61,22 @@
       margin-bottom: 0.9rem;
       font-family: 'JetBrains Mono', monospace;
     }
+
     h1 {
       font-size: clamp(1.8rem, 4vw, 2.6rem);
       font-weight: 900;
       background: linear-gradient(135deg, #fff 10%, #ffcc00 60%, #ff4500 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .sub { margin-top: 0.5rem; color: var(--muted); font-size: 0.9rem; }
 
-    
+    .sub {
+      margin-top: 0.5rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
     main {
       display: flex;
       flex-direction: column;
@@ -76,6 +95,7 @@
       border-radius: var(--radius);
       padding: 1.4rem;
     }
+
     .panel-title {
       font-size: 0.68rem;
       letter-spacing: 0.14em;
@@ -85,465 +105,768 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
-    
-    .draw-panel { flex: 0 0 auto; width: 100%; max-width: 1020px; display: flex; flex-direction: column; align-items: center; }
+    .draw-panel {
+      flex: 0 0 auto;
+      width: 100%;
+      max-width: 1020px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
     #drawCanvas {
       display: block;
-      width: 100%; max-width: 960px; height: auto;
+      width: 100%;
+      max-width: 960px;
+      height: auto;
       aspect-ratio: 960 / 280;
       background: #080808;
       border-radius: 14px;
-      border: 1.5px solid rgba(124,58,237,0.25);
+      border: 1.5px solid rgba(124, 58, 237, 0.25);
       cursor: crosshair;
       touch-action: none;
-      box-shadow: 0 0 40px rgba(124,58,237,0.08) inset;
+      box-shadow: 0 0 40px rgba(124, 58, 237, 0.08) inset;
       transition: border-color 0.3s;
     }
-    #drawCanvas.active { border-color: rgba(124,58,237,0.55); }
+
+    #drawCanvas.active {
+      border-color: rgba(124, 58, 237, 0.55);
+    }
 
     .brush-row {
-      display: flex; align-items: center; gap: 0.7rem;
-      margin-top: 0.9rem; color: var(--muted); font-size: 0.78rem;
-      width: 100%; max-width: 960px;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin-top: 0.9rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      width: 100%;
+      max-width: 960px;
     }
+
     input[type=range] {
-      flex: 1; height: 4px; -webkit-appearance: none;
-      background: rgba(255,255,255,0.1); border-radius: 2px; outline: none;
+      flex: 1;
+      height: 4px;
+      -webkit-appearance: none;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      outline: none;
     }
+
     input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 14px; height: 14px;
-      border-radius: 50%; background: var(--purple); cursor: pointer;
-      box-shadow: 0 0 8px rgba(124,58,237,0.7);
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--purple);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(124, 58, 237, 0.7);
     }
-    #brushVal { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; min-width: 2.5rem; text-align: right; }
 
-    .btn-row { display: flex; gap: 0.7rem; margin-top: 1rem; width: 100%; max-width: 960px; }
+    #brushVal {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      min-width: 2.5rem;
+      text-align: right;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.7rem;
+      margin-top: 1rem;
+      width: 100%;
+      max-width: 960px;
+    }
+
     button {
-      flex: 1; padding: 0.75rem 1rem; border: none; border-radius: 12px;
-      font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600;
-      cursor: pointer; transition: all 0.2s;
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-    .btn-clear { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.65); border: 1px solid var(--border); }
-    .btn-clear:hover { background: rgba(255,255,255,0.1); color: #fff; }
-    .btn-predict { background: linear-gradient(135deg, #ff6b00 0%, #ffcc00 100%); color: #111; box-shadow: 0 4px 24px rgba(255,107,0,0.38); }
-    .btn-predict:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,107,0,0.55); }
-    .btn-predict:active { transform: translateY(0); }
-    .btn-predict:disabled { opacity: 0.55; transform: none; cursor: not-allowed; box-shadow: none; }
 
-    .hint-row { margin-top: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
-    .hint { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-    .acc-dot { width: 6px; height: 6px; border-radius: 50%; background: #06b6d4; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+    .btn-clear {
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.65);
+      border: 1px solid var(--border);
+    }
 
-    
-    .result-panel { flex: 1; display: flex; flex-direction: column; gap: 1rem; width: 100%; max-width: 1020px; }
+    .btn-clear:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
 
-    
+    .btn-predict {
+      background: linear-gradient(135deg, #ff6b00 0%, #ffcc00 100%);
+      color: #111;
+      box-shadow: 0 4px 24px rgba(255, 107, 0, 0.38);
+    }
+
+    .btn-predict:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(255, 107, 0, 0.55);
+    }
+
+    .btn-predict:active {
+      transform: translateY(0);
+    }
+
+    .btn-predict:disabled {
+      opacity: 0.55;
+      transform: none;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .hint-row {
+      margin-top: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .acc-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #06b6d4;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(0.8)
+      }
+    }
+
+    .result-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      max-width: 1020px;
+    }
+
     .number-card {
       padding: 1.5rem;
       text-align: center;
       position: relative;
       overflow: hidden;
     }
+
     .number-card::before {
       content: '';
-      position: absolute; inset: 0;
-      background: radial-gradient(circle at 50% 30%, rgba(255,107,0,0.1), transparent 70%);
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 30%, rgba(255, 107, 0, 0.1), transparent 70%);
       pointer-events: none;
     }
+
     .number-display {
-      font-size: 5.5rem; font-weight: 900; line-height: 1;
+      font-size: 5.5rem;
+      font-weight: 900;
+      line-height: 1;
       min-height: 6.5rem;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       gap: 0.1em;
       letter-spacing: 0.05em;
       font-family: 'JetBrains Mono', monospace;
     }
-    .number-display.empty { opacity: 0.15; }
+
+    .number-display.empty {
+      opacity: 0.15;
+    }
+
     .num-char {
       background: linear-gradient(135deg, #fff 10%, #ffcc00 80%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .conf-line { margin-top: 0.5rem; font-size: 0.82rem; color: var(--muted); min-height: 1.2em; }
-    .conf-line .val { color: #ffaa00; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
 
-    
-    .cards-section { padding: 1.2rem 1.4rem; }
+    .conf-line {
+      margin-top: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      min-height: 1.2em;
+    }
+
+    .conf-line .val {
+      color: #ffaa00;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .cards-section {
+      padding: 1.2rem 1.4rem;
+    }
+
     .digit-cards {
-      display: flex; gap: 0.7rem; flex-wrap: wrap;
+      display: flex;
+      gap: 0.7rem;
+      flex-wrap: wrap;
       margin-top: 0.75rem;
     }
+
     .digit-card {
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 0.65rem 0.75rem;
-      display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
       cursor: pointer;
       transition: all 0.2s;
       min-width: 80px;
     }
-    .digit-card:hover { background: rgba(255,255,255,0.09); border-color: rgba(124,58,237,0.4); }
-    .digit-card.selected {
-      background: rgba(124,58,237,0.15);
-      border-color: rgba(124,58,237,0.55);
-      box-shadow: 0 0 20px rgba(124,58,237,0.2);
+
+    .digit-card:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(124, 58, 237, 0.4);
     }
-    .card-canvas { border-radius: 4px; border: 1px solid rgba(255,255,255,0.08); background: #000; }
+
+    .digit-card.selected {
+      background: rgba(124, 58, 237, 0.15);
+      border-color: rgba(124, 58, 237, 0.55);
+      box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+    }
+
+    .card-canvas {
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #000;
+    }
+
     .card-digit {
-      font-size: 1.5rem; font-weight: 900;
+      font-size: 1.5rem;
+      font-weight: 900;
       font-family: 'JetBrains Mono', monospace;
       background: linear-gradient(135deg, #fff, #a78bfa);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .card-conf { font-size: 0.68rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-    .no-digits { color: var(--muted); font-size: 0.82rem; text-align: center; padding: 1rem; }
 
-    
-    .bars-card { padding: 1.2rem 1.4rem; }
-    .bars-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; }
-    .bars-subtitle { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #ffaa00; }
+    .card-conf {
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
 
-    .bar-row { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.38rem; }
-    .bar-label { width: 0.9rem; font-size: 0.8rem; font-weight: 700; text-align: right; color: var(--muted); font-family: 'JetBrains Mono', monospace; transition: color 0.3s; }
-    .bar-track { flex: 1; height: 10px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden; }
-    .bar-fill { height: 100%; border-radius: 6px; width: 0%; background: linear-gradient(90deg, #7c3aed, #06b6d4); transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1); }
-    .bar-pct { width: 3.8rem; font-size: 0.72rem; text-align: right; color: var(--muted); font-family: 'JetBrains Mono', monospace; transition: color 0.3s; }
-    .bar-row.winner .bar-label { color: #ffaa00; }
-    .bar-row.winner .bar-fill  { background: linear-gradient(90deg, #ffcc00, #ff6b00); }
-    .bar-row.winner .bar-pct   { color: #ffaa00; font-weight: 700; }
+    .no-digits {
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-align: center;
+      padding: 1rem;
+    }
 
-    
-    @keyframes pop-in { 0%{transform:scale(0.7);opacity:0} 65%{transform:scale(1.08)} 100%{transform:scale(1);opacity:1} }
-    .pop { animation: pop-in 0.42s cubic-bezier(0.34,1.56,0.64,1) both; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner { width:18px;height:18px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px; }
+    .bars-card {
+      padding: 1.2rem 1.4rem;
+    }
 
-    /* ── Skeleton Overlay ── */
+    .bars-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
+    }
+
+    .bars-subtitle {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: #ffaa00;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.38rem;
+    }
+
+    .bar-label {
+      width: 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-align: right;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      transition: color 0.3s;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      width: 0%;
+      background: linear-gradient(90deg, #7c3aed, #06b6d4);
+      transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .bar-pct {
+      width: 3.8rem;
+      font-size: 0.72rem;
+      text-align: right;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      transition: color 0.3s;
+    }
+
+    .bar-row.winner .bar-label {
+      color: #ffaa00;
+    }
+
+    .bar-row.winner .bar-fill {
+      background: linear-gradient(90deg, #ffcc00, #ff6b00);
+    }
+
+    .bar-row.winner .bar-pct {
+      color: #ffaa00;
+      font-weight: 700;
+    }
+
+    @keyframes pop-in {
+      0% {
+        transform: scale(0.7);
+        opacity: 0
+      }
+
+      65% {
+        transform: scale(1.08)
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1
+      }
+    }
+
+    .pop {
+      animation: pop-in 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    /* Loader Overlay */
     .loader-overlay {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       background: rgba(8, 8, 16, 0.85);
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       z-index: 9999;
-      opacity: 0; transition: opacity 0.4s;
+      opacity: 0;
+      transition: opacity 0.4s;
       pointer-events: none;
     }
-    .loader-overlay.active { opacity: 1; pointer-events: all; }
+
+    .loader-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
     .loader-logo {
-      width: 110px; height: 110px; border-radius: 28px;
-      box-shadow: 0 10px 50px rgba(255,107,0,0.5);
+      width: 110px;
+      height: 110px;
+      border-radius: 28px;
+      box-shadow: 0 10px 50px rgba(255, 107, 0, 0.5);
       animation: pulse-logo 1.5s infinite alternate;
       margin-bottom: 2.5rem;
     }
+
     @keyframes pulse-logo {
-      0% { transform: scale(0.95); box-shadow: 0 0 25px rgba(255,107,0,0.4); }
-      100% { transform: scale(1.05); box-shadow: 0 0 60px rgba(255,204,0,0.8); }
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 25px rgba(255, 107, 0, 0.4);
+      }
+
+      100% {
+        transform: scale(1.05);
+        box-shadow: 0 0 60px rgba(255, 204, 0, 0.8);
+      }
     }
+
     .loader-text {
-      font-size: 1.8rem; font-weight: 800;
+      font-size: 1.8rem;
+      font-weight: 800;
       background: linear-gradient(135deg, #fff 10%, #ffcc00 60%, #ff4500 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      margin-bottom: 1.8rem; letter-spacing: 0.05em;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.8rem;
+      letter-spacing: 0.05em;
     }
+
     .loader-skeleton-bar {
-      width: 240px; height: 8px; border-radius: 4px;
-      background: rgba(255,255,255,0.1);
-      overflow: hidden; position: relative;
+      width: 240px;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      position: relative;
     }
+
     .loader-skeleton-bar::after {
-      content: ''; position: absolute; top: 0; left: -50%; width: 50%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,204,0,0.9), transparent);
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -50%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 204, 0, 0.9), transparent);
       animation: skeleton-load 1.2s infinite linear;
     }
-    @keyframes skeleton-load { 0% { left: -50%; } 100% { left: 100%; } }
+
+    @keyframes skeleton-load {
+      0% {
+        left: -50%;
+      }
+
+      100% {
+        left: 100%;
+      }
+    }
 
     @media (max-width: 720px) {
-      main { flex-direction: column; align-items: center; padding: 0 0.5rem 2rem; }
-      #drawCanvas { width: 100%; height: auto; }
-      .number-display { font-size: 4rem; }
+      main {
+        flex-direction: column;
+        align-items: center;
+        padding: 0 0.5rem 2rem;
+      }
+
+      #drawCanvas {
+        width: 100%;
+        height: auto;
+      }
+
+      .number-display {
+        font-size: 4rem;
+      }
     }
   </style>
 </head>
+
 <body>
 
-<div id="loaderOverlay" class="loader-overlay" style="display:none;">
-  <img src="/logo.png" class="loader-logo" alt="SUN Vision">
-  <h2 class="loader-text">SUN is predicting...</h2>
-  <div class="loader-skeleton-bar"></div>
-</div>
-
-<header>
-  <img src="/logo.png" alt="SUN Vision Logo" style="width: 84px; height: 84px; border-radius: 22px; margin-bottom: 1.2rem; box-shadow: 0 10px 30px rgba(255,107,0,0.3);">
-  <br>
-  <p class="badge">numpy · neural network · 99.24% accuracy</p>
-  <h1>SUN Vision</h1>
-  <p class="sub">Draw a single digit or a multi-digit number (e.g. 42, 137…)</p>
-</header>
-
-<main>
-  
-  <div class="panel draw-panel">
-    <p class="panel-title">Draw here</p>
-    <canvas id="drawCanvas" width="960" height="280"></canvas>
-
-    <div class="brush-row">
-      <span>Brush</span>
-      <input type="range" id="brushSlider" min="8" max="36" value="22">
-      <span id="brushVal">22px</span>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn-clear" onclick="clearAll()">✕ Clear</button>
-      <button class="btn-predict" id="predictBtn" onclick="predict()">Predict →</button>
-    </div>
-
-    <div class="hint-row">
-      <span class="acc-dot"></span>
-      <span class="hint">MLP · 99.24% accuracy · Enter to predict</span>
-    </div>
+  <div id="loaderOverlay" class="loader-overlay" style="display:none;">
+    <img src="/logo.png" class="loader-logo" alt="SUN Vision">
+    <h2 class="loader-text">SUN is predicting...</h2>
+    <div class="loader-skeleton-bar"></div>
   </div>
 
-  
-  <div class="result-panel">
+  <header>
+    <img src="/logo.png" alt="SUN Vision Logo"
+      style="width: 84px; height: 84px; border-radius: 22px; margin-bottom: 1.2rem; box-shadow: 0 10px 30px rgba(255,107,0,0.3);">
+    <br>
+    <p class="badge">numpy · neural network · 99.24% accuracy</p>
+    <h1>SUN Vision</h1>
+    <p class="sub">Draw a single digit or a multi-digit number (e.g. 42, 137…)</p>
+  </header>
 
-    
-    <div class="panel number-card">
-      <p class="panel-title">Predicted number</p>
-      <div class="number-display empty" id="numberDisplay">
-        <span class="num-char">?</span>
+  <main>
+    <div class="panel draw-panel">
+      <p class="panel-title">Draw here</p>
+      <canvas id="drawCanvas" width="960" height="280"></canvas>
+
+      <div class="brush-row">
+        <span>Brush</span>
+        <input type="range" id="brushSlider" min="8" max="36" value="22">
+        <span id="brushVal">22px</span>
       </div>
-      <p class="conf-line" id="confLine">Draw a number above, then click Predict</p>
+
+      <div class="btn-row">
+        <button class="btn-clear" onclick="clearAll()">✕ Clear</button>
+        <button class="btn-predict" id="predictBtn" onclick="predict()">Predict →</button>
+      </div>
+
+      <div class="hint-row">
+        <span class="acc-dot"></span>
+        <span class="hint">MLP · 99.24% accuracy · Enter to predict</span>
+      </div>
     </div>
 
-    
-    <div class="panel cards-section">
-      <div class="bars-header">
-        <p class="panel-title" style="margin:0">Detected digits</p>
-        <span class="bars-subtitle" id="digitCountLabel">—</span>
+    <div class="result-panel">
+      <div class="panel number-card">
+        <p class="panel-title">Predicted number</p>
+        <div class="number-display empty" id="numberDisplay">
+          <span class="num-char">?</span>
+        </div>
+        <p class="conf-line" id="confLine">Draw a number above, then click Predict</p>
       </div>
-      <div class="digit-cards" id="digitCards">
-        <p class="no-digits">No digits detected yet</p>
+
+      <div class="panel cards-section">
+        <div class="bars-header">
+          <p class="panel-title" style="margin:0">Detected digits</p>
+          <span class="bars-subtitle" id="digitCountLabel">—</span>
+        </div>
+        <div class="digit-cards" id="digitCards">
+          <p class="no-digits">No digits detected yet</p>
+        </div>
+      </div>
+
+      <div class="panel bars-card">
+        <div class="bars-header">
+          <p class="panel-title" style="margin:0">Probabilities</p>
+          <span class="bars-subtitle" id="barsSubtitle">—</span>
+        </div>
+        <div id="barsContainer"></div>
       </div>
     </div>
+  </main>
 
-    
-    <div class="panel bars-card">
-      <div class="bars-header">
-        <p class="panel-title" style="margin:0">Probabilities</p>
-        <span class="bars-subtitle" id="barsSubtitle">—</span>
-      </div>
-      <div id="barsContainer"></div>
-    </div>
+  <script>
+    const canvas = document.getElementById('drawCanvas');
+    const ctx = canvas.getContext('2d');
+    let brushSize = 22, isDrawing = false, lastX = 0, lastY = 0;
 
-  </div>
-</main>
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, 960, 280);
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = brushSize;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
 
-<script>
+    document.getElementById('brushSlider').addEventListener('input', function () {
+      brushSize = parseInt(this.value);
+      document.getElementById('brushVal').textContent = brushSize + 'px';
+      ctx.lineWidth = brushSize;
+    });
 
-const canvas  = document.getElementById('drawCanvas');
-const ctx     = canvas.getContext('2d');
-let brushSize = 22, isDrawing = false, lastX = 0, lastY = 0;
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+      const s = e.touches ? e.touches[0] : e;
+      return { x: (s.clientX - rect.left) * sx, y: (s.clientY - rect.top) * sy };
+    }
 
-ctx.fillStyle = '#000';
-ctx.fillRect(0, 0, 960, 280);
-ctx.strokeStyle = '#fff'; ctx.lineWidth = brushSize;
-ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    function onStart(e) {
+      isDrawing = true;
+      const { x, y } = getPos(e); lastX = x; lastY = y;
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2); ctx.fill();
+      canvas.classList.add('active'); e.preventDefault();
+    }
+    function onMove(e) {
+      if (!isDrawing) return;
+      const { x, y } = getPos(e);
+      ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+      lastX = x; lastY = y; e.preventDefault();
+    }
+    function onStop() { isDrawing = false; canvas.classList.remove('active'); }
 
-document.getElementById('brushSlider').addEventListener('input', function() {
-  brushSize = parseInt(this.value);
-  document.getElementById('brushVal').textContent = brushSize + 'px';
-  ctx.lineWidth = brushSize;
-});
+    canvas.addEventListener('mousedown', onStart); canvas.addEventListener('mousemove', onMove);
+    canvas.addEventListener('mouseup', onStop); canvas.addEventListener('mouseleave', onStop);
+    canvas.addEventListener('touchstart', onStart, { passive: false }); canvas.addEventListener('touchmove', onMove, { passive: false });
+    canvas.addEventListener('touchend', onStop);
 
-function getPos(e) {
-  const rect = canvas.getBoundingClientRect();
-  const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
-  const s  = e.touches ? e.touches[0] : e;
-  return { x: (s.clientX - rect.left) * sx, y: (s.clientY - rect.top) * sy };
-}
-
-function onStart(e) {
-  isDrawing = true;
-  const {x,y} = getPos(e); lastX = x; lastY = y;
-  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, brushSize/2, 0, Math.PI*2); ctx.fill();
-  canvas.classList.add('active'); e.preventDefault();
-}
-function onMove(e) {
-  if (!isDrawing) return;
-  const {x,y} = getPos(e);
-  ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
-  lastX = x; lastY = y; e.preventDefault();
-}
-function onStop() { isDrawing = false; canvas.classList.remove('active'); }
-
-canvas.addEventListener('mousedown', onStart); canvas.addEventListener('mousemove', onMove);
-canvas.addEventListener('mouseup', onStop);    canvas.addEventListener('mouseleave', onStop);
-canvas.addEventListener('touchstart', onStart, {passive:false}); canvas.addEventListener('touchmove', onMove, {passive:false});
-canvas.addEventListener('touchend', onStop);
-
-
-const barsEl = document.getElementById('barsContainer');
-for (let i = 0; i < 10; i++) {
-  barsEl.insertAdjacentHTML('beforeend', `
+    const barsEl = document.getElementById('barsContainer');
+    for (let i = 0; i < 10; i++) {
+      barsEl.insertAdjacentHTML('beforeend', `
     <div class="bar-row" id="row-${i}">
       <span class="bar-label">${i}</span>
       <div class="bar-track"><div class="bar-fill" id="fill-${i}"></div></div>
       <span class="bar-pct"  id="pct-${i}">—</span>
     </div>`);
-}
-
-
-let lastData    = null;
-let selectedIdx = 0;
-
-
-function clearAll() {
-  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 960, 280);
-  lastData = null; selectedIdx = 0;
-
-  const nd = document.getElementById('numberDisplay');
-  nd.innerHTML = '<span class="num-char">?</span>'; nd.className = 'number-display empty';
-  document.getElementById('confLine').textContent = 'Draw a number above, then click Predict';
-  document.getElementById('digitCountLabel').textContent = '—';
-  document.getElementById('barsSubtitle').textContent = '—';
-  document.getElementById('digitCards').innerHTML = '<p class="no-digits">No digits detected yet</p>';
-  for (let i = 0; i < 10; i++) {
-    document.getElementById(`fill-${i}`).style.width = '0%';
-    document.getElementById(`pct-${i}`).textContent  = '—';
-    document.getElementById(`row-${i}`).classList.remove('winner');
-  }
-}
-
-
-function getFullPixels() {
-  const raw = ctx.getImageData(0, 0, 960, 280).data;
-  const pix = [];
-  for (let i = 0; i < 960*280; i++) pix.push(raw[i*4]);  
-  return pix;
-}
-
-
-async function predict() {
-  const pixels = getFullPixels();
-  if (!pixels.some(p => p > 10)) { shake(canvas); return; }
-
-  const btn = document.getElementById('predictBtn');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Predicting…';
-
-  const loader = document.getElementById('loaderOverlay');
-  loader.style.display = 'flex';
-  loader.offsetHeight; // force reflow
-  loader.classList.add('active');
-
-  // Artificial 2-second loading delay
-  await new Promise(r => setTimeout(r, 2000));
-
-  try {
-    const res  = await fetch('/predict_multi', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({pixels, width: 960, height: 280})
-    });
-    const data = await res.json();
-    lastData = data;
-    displayResults(data);
-  } catch (err) {
-    alert('Server error. Is app.py running?'); console.error(err);
-  }
-
-  loader.classList.remove('active');
-  setTimeout(() => loader.style.display = 'none', 400);
-
-  btn.disabled = false; btn.innerHTML = 'Predict →';
-}
-
-
-function displayResults(data) {
-  const {number, digits, previews} = data;
-
-  
-  const nd = document.getElementById('numberDisplay');
-  if (!number) {
-    nd.innerHTML = '<span class="num-char">?</span>';
-    nd.className = 'number-display empty';
-    document.getElementById('confLine').textContent = 'No digits detected — try drawing more clearly';
-    return;
-  }
-  nd.className = 'number-display pop';
-  nd.innerHTML = number.split('').map(c => `<span class="num-char">${c}</span>`).join('');
-
-  const avgConf = digits.reduce((s, d) => s + d.confidence, 0) / digits.length;
-  document.getElementById('confLine').innerHTML =
-    `${digits.length} digit${digits.length>1?'s':''} detected · avg confidence: <span class="val">${(avgConf*100).toFixed(1)}%</span>`;
-
-  
-  document.getElementById('digitCountLabel').textContent = digits.length + ' digit' + (digits.length>1?'s':'');
-  buildDigitCards(digits, previews);
-
-  
-  selectedIdx = 0;
-  updateBars(digits[0], 0);
-}
-
-function buildDigitCards(digits, previews) {
-  const container = document.getElementById('digitCards');
-  container.innerHTML = '';
-
-  digits.forEach((d, i) => {
-    const card = document.createElement('div');
-    card.className = 'digit-card' + (i === 0 ? ' selected' : '');
-    card.onclick = () => {
-      document.querySelectorAll('.digit-card').forEach((c, j) => c.classList.toggle('selected', j === i));
-      selectedIdx = i;
-      updateBars(d, i);
-    };
-
-    
-    const pc = document.createElement('canvas');
-    pc.width = 28; pc.height = 28;
-    pc.className = 'card-canvas';
-    pc.style.cssText = 'width:52px;height:52px;image-rendering:pixelated;';
-    const pCtx = pc.getContext('2d');
-    const img  = pCtx.createImageData(28, 28);
-    const flat = previews[i];
-    for (let j = 0; j < 784; j++) {
-      const v = Math.round(flat[j] * 255);
-      img.data[j*4]=v; img.data[j*4+1]=v; img.data[j*4+2]=v; img.data[j*4+3]=255;
     }
-    pCtx.putImageData(img, 0, 0);
 
-    card.appendChild(pc);
-    card.insertAdjacentHTML('beforeend',
-      `<span class="card-digit">${d.digit}</span>
-       <span class="card-conf">${(d.confidence*100).toFixed(1)}%</span>`);
-    container.appendChild(card);
-  });
-}
+    let lastData = null;
+    let selectedIdx = 0;
 
-function updateBars(digitResult, idx) {
-  document.getElementById('barsSubtitle').textContent = `Digit #${idx+1} → predicted "${digitResult.digit}"`;
-  for (let i = 0; i < 10; i++) {
-    const p   = digitResult.probabilities[i];
-    const pct = (p * 100).toFixed(1);
-    document.getElementById(`fill-${i}`).style.width = pct + '%';
-    document.getElementById(`pct-${i}`).textContent  = pct + '%';
-    document.getElementById(`row-${i}`).classList.toggle('winner', i === digitResult.digit);
-  }
-}
+    function clearAll() {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 960, 280);
+      lastData = null; selectedIdx = 0;
 
+      const nd = document.getElementById('numberDisplay');
+      nd.innerHTML = '<span class="num-char">?</span>'; nd.className = 'number-display empty';
+      document.getElementById('confLine').textContent = 'Draw a number above, then click Predict';
+      document.getElementById('digitCountLabel').textContent = '—';
+      document.getElementById('barsSubtitle').textContent = '—';
+      document.getElementById('digitCards').innerHTML = '<p class="no-digits">No digits detected yet</p>';
+      for (let i = 0; i < 10; i++) {
+        document.getElementById(`fill-${i}`).style.width = '0%';
+        document.getElementById(`pct-${i}`).textContent = '—';
+        document.getElementById(`row-${i}`).classList.remove('winner');
+      }
+    }
 
-function shake(el) {
-  el.style.transition = 'transform 0.08s ease';
-  [6,-6,4,-4,2,0].forEach((x,i) => setTimeout(() => { el.style.transform = `translateX(${x}px)`; }, i*80));
-  setTimeout(() => { el.style.transform = ''; el.style.transition = ''; }, 530);
-}
+    function getFullPixels() {
+      const raw = ctx.getImageData(0, 0, 960, 280).data;
+      const pix = [];
+      for (let i = 0; i < 960 * 280; i++) pix.push(raw[i * 4]);
+      return pix;
+    }
 
+    async function predict() {
+      const pixels = getFullPixels();
+      if (!pixels.some(p => p > 10)) { shake(canvas); return; }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter')              predict();
-  if (e.key === 'Escape' || e.key === 'Delete') clearAll();
-});
-</script>
+      const btn = document.getElementById('predictBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Predicting…';
+
+      const loader = document.getElementById('loaderOverlay');
+      loader.style.display = 'flex';
+      loader.offsetHeight; // force reflow
+      loader.classList.add('active');
+
+      try {
+        const res = await fetch('/predict_multi', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pixels, width: 960, height: 280 })
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `Server returned status ${res.status}`);
+        }
+
+        const data = await res.json();
+        lastData = data;
+        displayResults(data);
+      } catch (err) {
+        alert('Prediction error: ' + err.message);
+        console.error(err);
+      } finally {
+        loader.classList.remove('active');
+        setTimeout(() => loader.style.display = 'none', 400);
+        btn.disabled = false;
+        btn.innerHTML = 'Predict →';
+      }
+    }
+
+    function displayResults(data) {
+      const { number, digits, previews } = data;
+
+      const nd = document.getElementById('numberDisplay');
+      if (!number) {
+        nd.innerHTML = '<span class="num-char">?</span>';
+        nd.className = 'number-display empty';
+        document.getElementById('confLine').textContent = 'No digits detected — try drawing more clearly';
+        return;
+      }
+      nd.className = 'number-display pop';
+      nd.innerHTML = number.split('').map(c => `<span class="num-char">${c}</span>`).join('');
+
+      const avgConf = digits.reduce((s, d) => s + d.confidence, 0) / digits.length;
+      document.getElementById('confLine').innerHTML =
+        `${digits.length} digit${digits.length > 1 ? 's' : ''} detected · avg confidence: <span class="val">${(avgConf * 100).toFixed(1)}%</span>`;
+
+      document.getElementById('digitCountLabel').textContent = digits.length + ' digit' + (digits.length > 1 ? 's' : '');
+      buildDigitCards(digits, previews);
+
+      selectedIdx = 0;
+      updateBars(digits[0], 0);
+    }
+
+    function buildDigitCards(digits, previews) {
+      const container = document.getElementById('digitCards');
+      container.innerHTML = '';
+
+      digits.forEach((d, i) => {
+        const card = document.createElement('div');
+        card.className = 'digit-card' + (i === 0 ? ' selected' : '');
+        card.onclick = () => {
+          document.querySelectorAll('.digit-card').forEach((c, j) => c.classList.toggle('selected', j === i));
+          selectedIdx = i;
+          updateBars(d, i);
+        };
+
+        const pc = document.createElement('canvas');
+        pc.width = 28; pc.height = 28;
+        pc.className = 'card-canvas';
+        pc.style.cssText = 'width:52px;height:52px;image-rendering:pixelated;';
+        const pCtx = pc.getContext('2d');
+        const img = pCtx.createImageData(28, 28);
+        const flat = previews[i];
+        for (let j = 0; j < 784; j++) {
+          const v = Math.round(flat[j] * 255);
+          img.data[j * 4] = v; img.data[j * 4 + 1] = v; img.data[j * 4 + 2] = v; img.data[j * 4 + 3] = 255;
+        }
+        pCtx.putImageData(img, 0, 0);
+
+        card.appendChild(pc);
+        card.insertAdjacentHTML('beforeend',
+          `<span class="card-digit">${d.digit}</span>
+       <span class="card-conf">${(d.confidence * 100).toFixed(1)}%</span>`);
+        container.appendChild(card);
+      });
+    }
+
+    function updateBars(digitResult, idx) {
+      document.getElementById('barsSubtitle').textContent = `Digit #${idx + 1} → predicted "${digitResult.digit}"`;
+      for (let i = 0; i < 10; i++) {
+        const p = digitResult.probabilities[i];
+        const pct = (p * 100).toFixed(1);
+        document.getElementById(`fill-${i}`).style.width = pct + '%';
+        document.getElementById(`pct-${i}`).textContent = pct + '%';
+        document.getElementById(`row-${i}`).classList.toggle('winner', i === digitResult.digit);
+      }
+    }
+
+    function shake(el) {
+      el.style.transition = 'transform 0.08s ease';
+      [6, -6, 4, -4, 2, 0].forEach((x, i) => setTimeout(() => { el.style.transform = `translateX(${x}px)`; }, i * 80));
+      setTimeout(() => { el.style.transform = ''; el.style.transition = ''; }, 530);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') predict();
+      if (e.key === 'Escape' || e.key === 'Delete') clearAll();
+    });
+  </script>
 </body>
+
 </html>

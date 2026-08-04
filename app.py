@@ -5,8 +5,9 @@ import random, gzip, urllib.request, os, ssl
 np.random.seed(42)
 random.seed(42)
 
-WEIGHTS_FILE = 'mlp_weights.npz'
-DATA_DIR     = 'mnist_data'
+BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
+WEIGHTS_FILE = os.path.join(BASE_DIR, 'mlp_weights.npz')
+DATA_DIR     = os.path.join(BASE_DIR, 'mnist_data')
 
 class NeuralNetwork:
     def __init__(self, layer_sizes, lr=0.001, l2=0.0003, dropout=0.3):
@@ -260,71 +261,78 @@ def resize_to_28x28(crop):
 
 app = Flask(__name__)
 
-NN    = None
-MU    = None
-SIGMA = None
+# --- LOAD MODEL GLOBALLY (Executes when imported by Gunicorn) ---
+NN, MU, SIGMA = load_model()
+if NN is None:
+    print("⚠️ Weights not found! Training model locally...")
+    NN, MU, SIGMA = train_and_save()
+else:
+    print("✓ Loaded saved model weights successfully.")
 
 @app.route('/')
 def index():
-    return send_file('index.html')
+    return send_file(os.path.join(BASE_DIR, 'index.html'))
 
 @app.route('/logo.png')
 def logo():
-    return send_file('logo.png')
+    logo_path = os.path.join(BASE_DIR, 'logo.png')
+    if os.path.exists(logo_path):
+        return send_file(logo_path)
+    return ('', 204)
 
 @app.route('/predict', methods=['POST'])
 def predict():
     global NN, MU, SIGMA
-    data   = request.get_json()
-    pixels = np.array(data['pixels'], dtype=np.float32).reshape(1, 784)
+    try:
+        data   = request.get_json()
+        pixels = np.array(data['pixels'], dtype=np.float32).reshape(1, 784)
 
-    pixels_std = (pixels - MU) / SIGMA
+        pixels_std = (pixels - MU) / SIGMA
 
-    probs = NN.forward(pixels_std, training=False)[0]
-    pred  = int(np.argmax(probs))
+        probs = NN.forward(pixels_std, training=False)[0]
+        pred  = int(np.argmax(probs))
 
-    return jsonify({
-        'prediction':    pred,
-        'confidence':    float(probs[pred]),
-        'probabilities': [float(p) for p in probs],
-    })
+        return jsonify({
+            'prediction':    pred,
+            'confidence':    float(probs[pred]),
+            'probabilities': [float(p) for p in probs],
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/predict_multi', methods=['POST'])
 def predict_multi():
     global NN, MU, SIGMA
-    data  = request.get_json()
-    w     = data.get('width', 280)
-    h     = data.get('height', 280)
-    crops = segment_digits(data['pixels'], W=w, H=h)
+    try:
+        data  = request.get_json()
+        w     = data.get('width', 280)
+        h     = data.get('height', 280)
+        crops = segment_digits(data['pixels'], W=w, H=h)
 
-    if not crops:
-        return jsonify({'digits': [], 'number': '', 'previews': []})
+        if not crops:
+            return jsonify({'digits': [], 'number': '', 'previews': []})
 
-    digits, previews = [], []
-    for crop in crops:
-        img28   = resize_to_28x28(crop)
-        previews.append([round(float(v), 3) for v in img28.flatten()])
-        x       = ((img28 - MU) / SIGMA).reshape(1, 784)
-        probs   = NN.forward(x, training=False)[0]
-        pred    = int(np.argmax(probs))
-        digits.append({
-            'digit':         pred,
-            'confidence':    round(float(probs[pred]), 4),
-            'probabilities': [round(float(p), 4) for p in probs],
+        digits, previews = [], []
+        for crop in crops:
+            img28   = resize_to_28x28(crop)
+            previews.append([round(float(v), 3) for v in img28.flatten()])
+            x       = ((img28 - MU) / SIGMA).reshape(1, 784)
+            probs   = NN.forward(x, training=False)[0]
+            pred    = int(np.argmax(probs))
+            digits.append({
+                'digit':         pred,
+                'confidence':    round(float(probs[pred]), 4),
+                'probabilities': [round(float(p), 4) for p in probs],
+            })
+
+        return jsonify({
+            'number':   ''.join(str(d['digit']) for d in digits),
+            'digits':   digits,
+            'previews': previews,
         })
-
-    return jsonify({
-        'number':   ''.join(str(d['digit']) for d in digits),
-        'digits':   digits,
-        'previews': previews,
-    })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    NN, MU, SIGMA = load_model()
-    if NN is None:
-        NN, MU, SIGMA = train_and_save()
-    else:
-        print("✓ Loaded saved model weights.")
-
     print("\n🚀 Starting server → http://localhost:5001\n")
     app.run(debug=False, port=5001, host='0.0.0.0')
