@@ -138,7 +138,7 @@ def augment(X, max_shift=2):
 def save_model(nn, mu, sigma):
     d = {'mu': np.array([mu]), 'sigma': np.array([sigma]),
          'n': np.array([nn.num_layers])}
-     for i, (w, b) in enumerate(zip(nn.weights, nn.biases)):
+    for i, (w, b) in enumerate(zip(nn.weights, nn.biases)):
         d[f'W{i}'] = w; d[f'b{i}'] = b
     np.savez(WEIGHTS_FILE, **d)
     print(f"  ✓ Saved model → {WEIGHTS_FILE}")
@@ -218,7 +218,7 @@ def segment_digits(pixels_flat, W=280, H=280, threshold=0.15, gap_tol=8, min_w=8
 
     segs, in_d, d_start, last_c = [], False, 0, -(gap_tol + 1)
     for c in range(W):
-         if col_s[c] > 0:
+        if col_s[c] > 0:
             if not in_d:
                 d_start = c
                 in_d    = True
@@ -238,7 +238,7 @@ def segment_digits(pixels_flat, W=280, H=280, threshold=0.15, gap_tol=8, min_w=8
             continue
         r0, r1  = int(rows[0]), int(rows[-1]) + 1
         crop    = arr[r0:r1, c0:c1].copy()
-         if crop.max() > 0:
+        if crop.max() > 0:
             crop /= crop.max()
         crops.append(crop)
     return crops
@@ -278,7 +278,6 @@ def predict():
     data   = request.get_json()
     pixels = np.array(data['pixels'], dtype=np.float32).reshape(1, 784)
 
-
     pixels_std = (pixels - MU) / SIGMA
 
     probs = NN.forward(pixels_std, training=False)[0]
@@ -289,6 +288,7 @@ def predict():
         'confidence':    float(probs[pred]),
         'probabilities': [float(p) for p in probs],
     })
+
 @app.route('/predict_multi', methods=['POST'])
 def predict_multi():
     global NN, MU, SIGMA
@@ -323,7 +323,7 @@ if __name__ == '__main__':
     NN, MU, SIGMA = load_model()
     if NN is None:
         NN, MU, SIGMA = train_and_save()
-         else:
+    else:
         print("✓ Loaded saved model weights.")
 
     print("\n🚀 Starting server → http://localhost:5001\n")
