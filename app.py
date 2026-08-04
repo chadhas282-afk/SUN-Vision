@@ -277,3 +277,15 @@ def predict():
     global NN, MU, SIGMA
     data   = request.get_json()
     pixels = np.array(data['pixels'], dtype=np.float32).reshape(1, 784)
+
+
+    pixels_std = (pixels - MU) / SIGMA
+
+    probs = NN.forward(pixels_std, training=False)[0]
+    pred  = int(np.argmax(probs))
+
+    return jsonify({
+        'prediction':    pred,
+        'confidence':    float(probs[pred]),
+        'probabilities': [float(p) for p in probs],
+    })
