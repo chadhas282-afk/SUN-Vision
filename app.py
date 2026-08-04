@@ -289,3 +289,17 @@ def predict():
         'confidence':    float(probs[pred]),
         'probabilities': [float(p) for p in probs],
     })
+@app.route('/predict_multi', methods=['POST'])
+def predict_multi():
+    global NN, MU, SIGMA
+    data  = request.get_json()
+    w     = data.get('width', 280)
+    h     = data.get('height', 280)
+    crops = segment_digits(data['pixels'], W=w, H=h)
+
+    if not crops:
+        return jsonify({'digits': [], 'number': '', 'previews': []})
+
+    digits, previews = [], []
+    for crop in crops:
+        img28   = resize_to_28x28(crop)
