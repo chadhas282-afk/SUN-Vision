@@ -58,7 +58,7 @@
     .sub { margin-top: 0.5rem; color: var(--muted); font-size: 0.9rem; }
 
     
-     main {
+    main {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
@@ -238,7 +238,7 @@
       margin-bottom: 2.5rem;
     }
     @keyframes pulse-logo {
-        0% { transform: scale(0.95); box-shadow: 0 0 25px rgba(255,107,0,0.4); }
+      0% { transform: scale(0.95); box-shadow: 0 0 25px rgba(255,107,0,0.4); }
       100% { transform: scale(1.05); box-shadow: 0 0 60px rgba(255,204,0,0.8); }
     }
     .loader-text {
@@ -268,7 +268,7 @@
 </head>
 <body>
 
-    <div id="loaderOverlay" class="loader-overlay" style="display:none;">
+<div id="loaderOverlay" class="loader-overlay" style="display:none;">
   <img src="/logo.png" class="loader-logo" alt="SUN Vision">
   <h2 class="loader-text">SUN is predicting...</h2>
   <div class="loader-skeleton-bar"></div>
@@ -328,7 +328,7 @@
       </div>
     </div>
 
-        
+    
     <div class="panel bars-card">
       <div class="bars-header">
         <p class="panel-title" style="margin:0">Probabilities</p>
@@ -358,7 +358,7 @@ document.getElementById('brushSlider').addEventListener('input', function() {
 });
 
 function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
+  const rect = canvas.getBoundingClientRect();
   const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
   const s  = e.touches ? e.touches[0] : e;
   return { x: (s.clientX - rect.left) * sx, y: (s.clientY - rect.top) * sy };
@@ -388,7 +388,7 @@ const barsEl = document.getElementById('barsContainer');
 for (let i = 0; i < 10; i++) {
   barsEl.insertAdjacentHTML('beforeend', `
     <div class="bar-row" id="row-${i}">
-        <span class="bar-label">${i}</span>
+      <span class="bar-label">${i}</span>
       <div class="bar-track"><div class="bar-fill" id="fill-${i}"></div></div>
       <span class="bar-pct"  id="pct-${i}">—</span>
     </div>`);
@@ -448,7 +448,7 @@ async function predict() {
     const data = await res.json();
     lastData = data;
     displayResults(data);
-    } catch (err) {
+  } catch (err) {
     alert('Server error. Is app.py running?'); console.error(err);
   }
 
@@ -478,7 +478,7 @@ function displayResults(data) {
     `${digits.length} digit${digits.length>1?'s':''} detected · avg confidence: <span class="val">${(avgConf*100).toFixed(1)}%</span>`;
 
   
-    document.getElementById('digitCountLabel').textContent = digits.length + ' digit' + (digits.length>1?'s':'');
+  document.getElementById('digitCountLabel').textContent = digits.length + ' digit' + (digits.length>1?'s':'');
   buildDigitCards(digits, previews);
 
   
@@ -538,3 +538,12 @@ function shake(el) {
   [6,-6,4,-4,2,0].forEach((x,i) => setTimeout(() => { el.style.transform = `translateX(${x}px)`; }, i*80));
   setTimeout(() => { el.style.transform = ''; el.style.transition = ''; }, 530);
 }
+
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter')              predict();
+  if (e.key === 'Escape' || e.key === 'Delete') clearAll();
+});
+</script>
+</body>
+</html>
