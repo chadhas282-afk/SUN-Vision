@@ -303,3 +303,18 @@ def predict_multi():
     digits, previews = [], []
     for crop in crops:
         img28   = resize_to_28x28(crop)
+        previews.append([round(float(v), 3) for v in img28.flatten()])
+        x       = ((img28 - MU) / SIGMA).reshape(1, 784)
+        probs   = NN.forward(x, training=False)[0]
+        pred    = int(np.argmax(probs))
+        digits.append({
+            'digit':         pred,
+            'confidence':    round(float(probs[pred]), 4),
+            'probabilities': [round(float(p), 4) for p in probs],
+        })
+
+    return jsonify({
+        'number':   ''.join(str(d['digit']) for d in digits),
+        'digits':   digits,
+        'previews': previews,
+    })
