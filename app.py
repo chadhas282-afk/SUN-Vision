@@ -138,3 +138,23 @@ def augment(X, max_shift=2):
 def save_model(nn, mu, sigma):
     d = {'mu': np.array([mu]), 'sigma': np.array([sigma]),
          'n': np.array([nn.num_layers])}
+     for i, (w, b) in enumerate(zip(nn.weights, nn.biases)):
+        d[f'W{i}'] = w; d[f'b{i}'] = b
+    np.savez(WEIGHTS_FILE, **d)
+    print(f"  ✓ Saved model → {WEIGHTS_FILE}")
+
+def load_model():
+    if not os.path.exists(WEIGHTS_FILE):
+        return None, None, None
+    d    = np.load(WEIGHTS_FILE)
+    n    = int(d['n'].item())
+    ws   = [d[f'W{i}'] for i in range(n)]
+    bs   = [d[f'b{i}'] for i in range(n)]
+    sizes = [ws[0].shape[0]] + [w.shape[1] for w in ws]
+    nn   = NeuralNetwork(sizes)
+    nn.weights = [w.copy() for w in ws]
+    nn.biases  = [b.copy() for b in bs]
+    return nn, float(d['mu'][0]), float(d['sigma'][0])
+
+def train_and_save():
+    print("\n🔥 Training MLP for 100 epochs — this will take a few minutes...")
