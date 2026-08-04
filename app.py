@@ -158,3 +158,23 @@ def load_model():
 
 def train_and_save():
     print("\n🔥 Training MLP for 100 epochs — this will take a few minutes...")
+    download_mnist()
+
+    X_raw = load_images(os.path.join(DATA_DIR, 'train-images-idx3-ubyte.gz'))
+    y_tr  = load_labels(os.path.join(DATA_DIR, 'train-labels-idx1-ubyte.gz'))
+    X_te  = load_images(os.path.join(DATA_DIR, 't10k-images-idx3-ubyte.gz'))
+    y_te  = load_labels(os.path.join(DATA_DIR, 't10k-labels-idx1-ubyte.gz'))
+
+    mu    = float(X_raw.mean())
+    sigma = float(X_raw.std())
+
+    X_te_std  = (X_te - mu) / sigma
+    y_tr_oh   = one_hot(y_tr)
+    N         = len(X_raw)
+
+    nn     = NeuralNetwork([784, 512, 256, 128, 10])
+    epochs = 100
+    bs     = 128
+    best_acc, best_W, best_b = 0.0, None, None
+
+    def get_lr(ep):
