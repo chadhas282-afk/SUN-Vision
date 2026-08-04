@@ -323,3 +323,8 @@ if __name__ == '__main__':
     NN, MU, SIGMA = load_model()
     if NN is None:
         NN, MU, SIGMA = train_and_save()
+         else:
+        print("✓ Loaded saved model weights.")
+
+    print("\n🚀 Starting server → http://localhost:5001\n")
+    app.run(debug=False, port=5001, host='0.0.0.0')
