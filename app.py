@@ -118,3 +118,23 @@ def load_labels(path):
 def one_hot(labels, n=10):
     oh = np.zeros((len(labels), n), dtype=np.float32)
     oh[np.arange(len(labels)), labels] = 1
+    return oh
+
+def augment(X, max_shift=2):
+    N = X.shape[0]
+    out = X.reshape(N, 28, 28).copy()
+    for i in range(N):
+        dy = random.randint(-max_shift, max_shift)
+        dx = random.randint(-max_shift, max_shift)
+        img = np.roll(out[i], dy, 0)
+        img = np.roll(img, dx, 1)
+        if dy > 0:  img[:dy, :]  = 0
+        elif dy < 0: img[dy:, :] = 0
+        if dx > 0:  img[:, :dx]  = 0
+        elif dx < 0: img[:, dx:] = 0
+        out[i] = img
+    return out.reshape(N, 784)
+
+def save_model(nn, mu, sigma):
+    d = {'mu': np.array([mu]), 'sigma': np.array([sigma]),
+         'n': np.array([nn.num_layers])}
