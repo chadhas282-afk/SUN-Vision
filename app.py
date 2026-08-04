@@ -198,3 +198,23 @@ def train_and_save():
             nn.backward(Xb, yb)
 
         acc = nn.accuracy(X_te_std, y_te)
+        restart_marker = " ↻" if ep == 50 else ""
+        print(f"  Epoch {ep+1:3d}/{epochs} | LR: {nn.lr:.5f} | Val Acc: {acc*100:.2f}%{restart_marker}")
+
+        if acc > best_acc:
+            best_acc = acc
+            best_W   = [w.copy() for w in nn.weights]
+            best_b   = [b.copy() for b in nn.biases]
+
+    nn.weights = best_W; nn.biases = best_b
+    print(f"\n  ✓ Best accuracy: {best_acc*100:.2f}%")
+    save_model(nn, mu, sigma)
+    return nn, mu, sigma
+
+def segment_digits(pixels_flat, W=280, H=280, threshold=0.15, gap_tol=8, min_w=8):
+    arr    = np.array(pixels_flat, dtype=np.float32).reshape(H, W) / 255.0
+    binary = (arr > threshold).astype(np.float32)
+    col_s  = binary.sum(axis=0)
+
+    segs, in_d, d_start, last_c = [], False, 0, -(gap_tol + 1)
+    for c in range(W):
