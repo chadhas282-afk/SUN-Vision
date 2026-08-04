@@ -178,3 +178,23 @@ def train_and_save():
     best_acc, best_W, best_b = 0.0, None, None
 
     def get_lr(ep):
+        cycle_len = 50
+        ep_in_cycle = ep % cycle_len
+        min_lr = 0.001 * 0.01
+        max_lr = 0.001 if ep < cycle_len else 0.0005
+        return min_lr + 0.5*(max_lr - min_lr)*(1 + np.cos(np.pi * ep_in_cycle / cycle_len))
+
+    for ep in range(epochs):
+        nn.lr = get_lr(ep)
+        idx = np.random.permutation(N)
+        Xr  = X_raw[idx]
+        Yo  = y_tr_oh[idx]
+
+        for i in range(0, N, bs):
+            Xb = augment(Xr[i:i+bs])
+            Xb = (Xb - mu) / sigma
+            yb = Yo[i:i+bs]
+            nn.forward(Xb, training=True)
+            nn.backward(Xb, yb)
+
+        acc = nn.accuracy(X_te_std, y_te)
