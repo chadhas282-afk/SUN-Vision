@@ -57,3 +57,24 @@ class NeuralNetwork:
                     self.masks.append(None)
             self.a.append(act)
         return self.a[-1]
+
+    def backward(self, X, y_true):
+        m = X.shape[0]; self.t += 1
+        dW = [None]*self.num_layers; db = [None]*self.num_layers
+        dz = self.a[-1] - y_true
+        for i in reversed(range(self.num_layers)):
+            l2_term  = (self.l2 / m) * self.weights[i]
+            dW[i]    = self.a[i].T @ dz / m + l2_term
+            db[i]    = dz.sum(0, keepdims=True) / m
+            if i > 0:
+                dz = dz @ self.weights[i].T * self.relu_d(self.z[i-1])
+                if self.masks[i-1] is not None:
+                    dz *= self.masks[i-1]
+        for i in range(self.num_layers):
+            self.m_w[i] = self.beta1*self.m_w[i] + (1-self.beta1)*dW[i]
+            self.m_b[i] = self.beta1*self.m_b[i] + (1-self.beta1)*db[i]
+            self.v_w[i] = self.beta2*self.v_w[i] + (1-self.beta2)*dW[i]**2
+            self.v_b[i] = self.beta2*self.v_b[i] + (1-self.beta2)*db[i]**2
+            mw = self.m_w[i]/(1-self.beta1**self.t)
+            mb = self.m_b[i]/(1-self.beta1**self.t)
+            vw = self.v_w[i]/(1-self.beta2**self.t)
