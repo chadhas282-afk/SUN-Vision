@@ -218,3 +218,23 @@ def segment_digits(pixels_flat, W=280, H=280, threshold=0.15, gap_tol=8, min_w=8
 
     segs, in_d, d_start, last_c = [], False, 0, -(gap_tol + 1)
     for c in range(W):
+         if col_s[c] > 0:
+            if not in_d:
+                d_start = c
+                in_d    = True
+            last_c = c
+        elif in_d and (c - last_c) > gap_tol:
+            if (last_c - d_start + 1) >= min_w:
+                segs.append((d_start, last_c + 1))
+            in_d = False
+    if in_d and (last_c - d_start + 1) >= min_w:
+        segs.append((d_start, last_c + 1))
+
+    crops = []
+    for c0, c1 in segs:
+        strip   = binary[:, c0:c1]
+        rows    = np.where(strip.sum(axis=1) > 0)[0]
+        if len(rows) == 0:
+            continue
+        r0, r1  = int(rows[0]), int(rows[-1]) + 1
+        crop    = arr[r0:r1, c0:c1].copy()
